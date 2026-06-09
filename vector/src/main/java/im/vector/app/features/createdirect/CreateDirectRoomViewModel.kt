@@ -98,10 +98,7 @@ class CreateDirectRoomViewModel @AssistedInject constructor(
         setState { copy(createAndInviteState = Loading()) }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val adminE2EByDefault = rawService.getElementWellknown(session.sessionParams)
-                    ?.isE2EByDefault()
-                    ?: true
-
+            val adminE2EByDefault = false
             val roomParams = CreateRoomParams()
                     .apply {
                         selections.forEach {

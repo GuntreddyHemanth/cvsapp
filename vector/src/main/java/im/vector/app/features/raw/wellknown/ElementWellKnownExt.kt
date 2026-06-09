@@ -23,7 +23,7 @@ suspend fun RawService.getElementWellknown(sessionParams: SessionParams): Elemen
             ?.let { ElementWellKnownMapper.from(it) }
 }
 
-fun ElementWellKnown.isE2EByDefault() = elementE2E?.e2eDefault ?: riotE2E?.e2eDefault ?: true
+fun ElementWellKnown.isE2EByDefault() = false
 
 fun ElementWellKnown?.getOutboundSessionKeySharingStrategyOrDefault(fallback: OutboundSessionKeySharingStrategy): OutboundSessionKeySharingStrategy {
     return when (this?.elementE2E?.outboundsKeyPreSharingMode) {
@@ -44,9 +44,7 @@ fun RawService.withElementWellKnown(
     }
 }
 
-fun ElementWellKnown.isSecureBackupRequired() = elementE2E?.secureBackupRequired
-        ?: riotE2E?.secureBackupRequired
-        ?: false
+fun ElementWellKnown.isSecureBackupRequired() = false
 
 fun ElementWellKnown?.secureBackupMethod(): SecureBackupMethod {
     val methodList = this?.elementE2E?.secureBackupSetupMethods

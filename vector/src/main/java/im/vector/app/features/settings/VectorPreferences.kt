@@ -1308,4 +1308,8 @@ class VectorPreferences @Inject constructor(
             putBoolean(IS_ON_RUST_CRYPTO, boolean)
         }
     }
+
+    fun isEncryptionEnabledByDefault(): Boolean {
+        return false
+    }
 }

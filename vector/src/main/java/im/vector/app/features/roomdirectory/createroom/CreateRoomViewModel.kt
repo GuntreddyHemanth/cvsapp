@@ -94,7 +94,7 @@ class CreateRoomViewModel @AssistedInject constructor(
         }
     }
 
-    private var adminE2EByDefault = true
+    private var adminE2EByDefault = false
 
     private fun initAdminE2eByDefault() {
         viewModelScope.launch(Dispatchers.IO) {

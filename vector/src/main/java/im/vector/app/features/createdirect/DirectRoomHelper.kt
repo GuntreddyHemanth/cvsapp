@@ -32,14 +32,10 @@ class DirectRoomHelper @Inject constructor(
         if (existingRoomId != null) {
             roomId = existingRoomId
         } else {
-            val adminE2EByDefault = rawService.getElementWellknown(session.sessionParams)
-                    ?.isE2EByDefault()
-                    ?: true
-
             val roomParams = CreateRoomParams().apply {
                 invitedUserIds.add(userId)
                 setDirectMessage()
-                enableEncryptionIfInvitedUsersSupportIt = adminE2EByDefault
+                enableEncryptionIfInvitedUsersSupportIt = false
             }
             roomId = if (vectorPreferences.isDeferredDmEnabled()) {
                 session.roomService().createLocalRoom(roomParams)
