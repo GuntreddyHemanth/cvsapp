@@ -609,11 +609,21 @@ class OnboardingViewModel @AssistedInject constructor(
 
     private suspend fun onSessionCreated(session: Session, authenticationDescription: AuthenticationDescription) {
         val state = awaitState()
-        state.useCase?.let { useCase ->
-            session.vectorStore(applicationContext).setUseCase(useCase)
-            analyticsTracker.updateUserProperties(UserProperties(ftueUseCaseSelection = useCase.toTrackingValue()))
-        }
         activeSessionHolder.setActiveSession(session)
+
+        // --- STEMWORLD FIX: SAVE NAME TO SERVER PROFILE ---
+        if (authenticationDescription is AuthenticationDescription.Register) {
+            val nameToSet = state.personalizationState.displayName
+            if (!nameToSet.isNullOrBlank()) {
+                try {
+                    // This command pushes the "Nani" name into your laptop's database
+                    session.profileService().setDisplayName(session.myUserId, nameToSet)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to push display name to server")
+                }
+            }
+        }
+        // --------------------------------------------------
 
         authenticationService.reset()
         configureAndStartSessionUseCase.execute(session)
@@ -634,14 +644,20 @@ class OnboardingViewModel @AssistedInject constructor(
         }
     }
 
+
     private suspend fun createPersonalizationState(session: Session, state: OnboardingViewState): PersonalizationState {
         return when {
             vectorFeatures.isOnboardingPersonalizeEnabled() -> {
                 val homeServerCapabilities = session.homeServerCapabilitiesService().getHomeServerCapabilities()
                 val capabilityOverrides = vectorOverrides.forceHomeserverCapabilities?.firstOrNull()
+
+                // THE FIX: Use the name already in state, only fallback to the ID if the name is missing.
+                val finalDisplayName = state.personalizationState.displayName.takeIf { !it.isNullOrBlank() }
+                        ?: state.registrationState.selectedMatrixId?.let { MatrixPatterns.extractUserNameFromId(it) }
+
                 state.personalizationState.copy(
                         userId = session.myUserId,
-                        displayName = state.registrationState.selectedMatrixId?.let { MatrixPatterns.extractUserNameFromId(it) },
+                        displayName = finalDisplayName,
                         supportsChangingDisplayName = capabilityOverrides?.canChangeDisplayName ?: homeServerCapabilities.canChangeDisplayName,
                         supportsChangingProfilePicture = capabilityOverrides?.canChangeAvatar ?: homeServerCapabilities.canChangeAvatar
                 )
@@ -649,6 +665,7 @@ class OnboardingViewModel @AssistedInject constructor(
             else -> state.personalizationState
         }
     }
+
 
     private fun handleWebLoginSuccess(action: OnboardingAction.WebLoginSuccess) = withState { state ->
         val homeServerConnectionConfigFinal = homeServerConnectionConfigFactory.create(state.selectedHomeserver.upstreamUrl)
@@ -843,21 +860,17 @@ class OnboardingViewModel @AssistedInject constructor(
     }
 
     private fun updateDisplayName(displayName: String) {
-        setState { copy(isLoading = true) }
-        viewModelScope.launch {
-            val activeSession = activeSessionHolder.getActiveSession()
-            try {
-                activeSession.profileService().setDisplayName(activeSession.myUserId, displayName)
-                setState {
-                    copy(
-                            isLoading = false,
-                            personalizationState = personalizationState.copy(displayName = displayName)
-                    )
-                }
-                handleDisplayNameStepComplete()
-            } catch (error: Throwable) {
-                setState { copy(isLoading = false) }
-                _viewEvents.post(OnboardingViewEvents.Failure(error))
+        // Just save to memory for now. We will push to server in onSessionCreated.
+        setState {
+            copy(personalizationState = personalizationState.copy(displayName = displayName))
+        }
+
+        // If we are already logged in (settings change), push to server
+        activeSessionHolder.getSafeActiveSession()?.let { session ->
+            viewModelScope.launch {
+                try {
+                    session.profileService().setDisplayName(session.myUserId, displayName)
+                } catch (e: Exception) { Timber.e(e) }
             }
         }
     }

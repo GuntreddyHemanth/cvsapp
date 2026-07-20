@@ -31,31 +31,45 @@
         <Space
             android:id="@+id/headerSpacing"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="56dp"
             app:layout_constraintBottom_toTopOf="@id/loginHeaderTitle"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintVertical_chainStyle="packed" />
+
+        <ImageView
+            android:id="@+id/loginLogo"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/opentera_logo"
+            android:scaleType="centerInside"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
 
         <TextView
             android:id="@+id/loginHeaderTitle"
             style="@style/Widget.Vector.TextView.Title.Medium"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="60dp"
             android:gravity="center"
             android:text="@string/ftue_auth_welcome_back_title"
             android:textColor="?vctr_content_primary"
-            app:layout_constraintBottom_toTopOf="@id/titleContentSpacing"
+            android:textSize="28sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@id/loginGutterEnd"
             app:layout_constraintStart_toStartOf="@id/loginGutterStart"
-            app:layout_constraintTop_toBottomOf="@id/headerSpacing" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Space
             android:id="@+id/titleContentSpacing"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@id/chooseYourServerHeader"
+            android:visibility="gone"
             app:layout_constraintHeight_percent="0.03"
             app:layout_constraintTop_toBottomOf="@id/loginHeaderTitle" />
 
@@ -69,6 +83,7 @@
             android:text="@string/ftue_auth_sign_in_choose_server_header"
             android:textColor="?vctr_content_secondary"
             app:layout_constraintBottom_toTopOf="@id/selectedServerName"
+            android:visibility="gone"
             app:layout_constraintEnd_toStartOf="@id/editServerButton"
             app:layout_constraintStart_toStartOf="@id/loginGutterStart"
             app:layout_constraintTop_toBottomOf="@id/titleContentSpacing" />
@@ -81,6 +96,7 @@
             android:layout_marginStart="12dp"
             android:textColor="?vctr_content_primary"
             app:layout_constraintBottom_toTopOf="@id/selectedServerDescription"
+            android:visibility="gone"
             app:layout_constraintEnd_toStartOf="@id/editServerButton"
             app:layout_constraintStart_toStartOf="@id/loginGutterStart"
             app:layout_constraintTop_toBottomOf="@id/chooseYourServerHeader"
@@ -95,6 +111,7 @@
             android:textColor="?vctr_content_tertiary"
             app:layout_constraintBottom_toTopOf="@id/serverSelectionSpacing"
             app:layout_constraintEnd_toStartOf="@id/editServerButton"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/loginGutterStart"
             app:layout_constraintTop_toBottomOf="@id/selectedServerName" />
 
@@ -108,6 +125,7 @@
             android:paddingEnd="12dp"
             android:text="@string/ftue_auth_create_account_edit_server_selection"
             android:textAllCaps="true"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/selectedServerDescription"
             app:layout_constraintEnd_toEndOf="@id/loginGutterEnd"
             app:layout_constraintTop_toTopOf="@id/chooseYourServerHeader" />
@@ -118,7 +136,7 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@id/loginInput"
             app:layout_constraintHeight_percent="0.05"
-            app:layout_constraintTop_toBottomOf="@id/selectedServerDescription" />
+            app:layout_constraintTop_toBottomOf="@id/titleContentSpacing" />
 
         <View
             android:layout_width="0dp"

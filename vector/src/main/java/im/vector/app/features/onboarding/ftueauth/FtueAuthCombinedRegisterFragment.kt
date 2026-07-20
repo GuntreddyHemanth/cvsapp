@@ -39,23 +39,44 @@ class FtueAuthCombinedRegisterFragment :
         withState(viewModel) { state ->
             if (state.isLoading) return@withState
 
+            cleanupUi()
             val fullName = views.registerDisplayNameInput.text.toString().trim()
             val mobile = views.registerUsernameInput.text.toString().trim()
             val password = views.registerPasswordInput.text.toString()
 
-            // 1. Validate inputs locally
-            if (fullName.isEmpty() || mobile.isEmpty() || password.length < 8) {
-                // Show errors on the boxes...
-                return@withState
+            // 1. REGEX for Indian Mobile: Starts with 6, 7, 8, or 9, followed by 9 digits
+            val indianMobileRegex = "^[6-9]\\d{9}$".toRegex()
+
+            var hasError = false
+
+            // Validate Full Name
+            if (fullName.isEmpty()) {
+                views.registerDisplayNameInputLayout.error = "Please enter your full name"
+                hasError = true
             }
+
+            // 2. VALIDATE MOBILE: Must be exactly 10 digits and Indian format
+            if (!mobile.matches(indianMobileRegex)) {
+                views.registerUsernameInputLayout.error = "Enter a valid 10-digit Indian number (starts with 6-9)"
+                hasError = true
+            }
+
+            // Validate Password
+            if (password.length < MINIMUM_PASSWORD_LENGTH) {
+                views.registerPasswordInputLayout.error = getString(CommonStrings.login_signup_password_hint)
+                hasError = true
+            }
+
+            // Stop if there is any validation error
+            if (hasError) return@withState
 
             views.registerSubmit.hideKeyboard()
 
-            // 2. THE TOTAL SOLUTION: Add a 'u' prefix
+            // 3. THE TOTAL SOLUTION: Add a 'u' prefix
             // This bypasses the "Numeric user IDs reserved" error 100% of the time.
             val safeId = "u$mobile"
 
-            // 3. We fire ONLY ONE action to prevent the "App Closing" navigation crash.
+            // 4. We fire ONLY ONE action to prevent the "App Closing" navigation crash.
             // We set the Full Name as the 'initialDeviceName' so the server gets it immediately.
             viewModel.handle(OnboardingAction.AuthenticateAction.Register(
                     username = safeId,
@@ -64,7 +85,6 @@ class FtueAuthCombinedRegisterFragment :
             ))
         }
     }
-
 
     private fun cleanupUi() {
         views.registerSubmit.hideKeyboard()

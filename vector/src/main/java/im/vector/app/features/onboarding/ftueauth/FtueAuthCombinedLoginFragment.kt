@@ -83,7 +83,18 @@ class FtueAuthCombinedLoginFragment :
                 .onPasswordError { views.loginPasswordInput.error = it }
                 .onValid { usernameOrId, password ->
                     val initialDeviceName = getString(CommonStrings.login_default_session_public_name)
-                    viewModel.handle(OnboardingAction.AuthenticateAction.Login(usernameOrId, password, initialDeviceName))
+
+                    // --- STEMWORLD FIX: Add 'u' prefix for mobile numbers ---
+                    // This logic checks if the user typed only numbers (a phone number)
+                    val trimmedInput = usernameOrId.trim()
+                    val safeUsernameOrId = if (trimmedInput.all { it.isDigit() }) {
+                        "u$trimmedInput"
+                    } else {
+                        trimmedInput
+                    }
+                    // -------------------------------------------------------
+
+                    viewModel.handle(OnboardingAction.AuthenticateAction.Login(safeUsernameOrId, password, initialDeviceName))
                 }
     }
 

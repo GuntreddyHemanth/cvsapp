@@ -49,7 +49,8 @@
                 android:id="@+id/registerUsernameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:inputType="number"
+                android:maxLength="10" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 3. PASSWORD -->
