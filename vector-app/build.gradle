@@ -178,7 +178,7 @@ android {
             // Configures multiple APKs based on ABI.
             abi {
                 // Enables building multiple APKs per ABI.
-                enable true
+                enable false
 
                 // By default all ABIs are included, so use reset() and include to specify that we only
                 // want APKs for armeabi-v7a, x86, arm64-v8a and x86_64.
@@ -247,7 +247,7 @@ android {
         debug {
             applicationIdSuffix ".debug"
             signingConfig signingConfigs.debug
-            resValue "string", "app_name", "OpenTera Debug"
+            resValue "string", "app_name", "TeraChat"
 
             if (project.hasProperty("coverage")) {
                 testCoverageEnabled = project.coverage == "true"
@@ -255,7 +255,7 @@ android {
         }
 
         release {
-            resValue "string", "app_name", "OpenTera"
+            resValue "string", "app_name", "TeraChat"
             postprocessing {
                 // FIXME Set to true.
                 removeUnusedCode false

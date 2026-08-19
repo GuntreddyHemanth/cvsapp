@@ -361,8 +361,11 @@ class OnboardingViewModel @AssistedInject constructor(
 
     private fun handleRegisterWith(userName: String, password: String, initialDeviceName: String) {
         setState {
+            val updatedPersonalization = personalizationState.copy(displayName = initialDeviceName)
             val authDescription = AuthenticationDescription.Register(AuthenticationDescription.AuthenticationType.Password)
-            copy(selectedAuthenticationState = SelectedAuthenticationState(authDescription))
+            copy(selectedAuthenticationState = SelectedAuthenticationState(authDescription),
+                    personalizationState = updatedPersonalization
+            )
         }
         reAuthHelper.data = password
         handleRegisterAction(
@@ -611,26 +614,27 @@ class OnboardingViewModel @AssistedInject constructor(
         val state = awaitState()
         activeSessionHolder.setActiveSession(session)
 
-        // --- STEMWORLD FIX: SAVE NAME TO SERVER PROFILE ---
+        // --- STEMWORLD FIX: FORCE NAME TO SERVER DATABASE ---
         if (authenticationDescription is AuthenticationDescription.Register) {
-            val nameToSet = state.personalizationState.displayName
-            if (!nameToSet.isNullOrBlank()) {
+            val nameFromMemory = state.personalizationState.displayName
+            if (!nameFromMemory.isNullOrBlank()) {
                 try {
-                    // This command pushes the "Nani" name into your laptop's database
-                    session.profileService().setDisplayName(session.myUserId, nameToSet)
+                    // This command pushes "bunny123" into your laptop's Synapse database
+                    session.profileService().setDisplayName(session.myUserId, nameFromMemory)
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to push display name to server")
+                    Timber.e(e, "Failed to push name to server")
                 }
             }
         }
-        // --------------------------------------------------
+        // ---------------------------------------------------
 
         authenticationService.reset()
         configureAndStartSessionUseCase.execute(session)
 
         when (authenticationDescription) {
             is AuthenticationDescription.Register -> {
-                val personalizationState = createPersonalizationState(session, state)
+                // We ensure personalizationState keeps our 'bunny123' name instead of the ID
+                val personalizationState = state.personalizationState.copy(userId = session.myUserId)
                 setState {
                     copy(isLoading = false, personalizationState = personalizationState)
                 }
@@ -638,7 +642,6 @@ class OnboardingViewModel @AssistedInject constructor(
             }
             AuthenticationDescription.Login -> {
                 setState { copy(isLoading = false, selectedAuthenticationState = SelectedAuthenticationState(authenticationDescription)) }
-                awaitState()
                 _viewEvents.post(OnboardingViewEvents.OnAccountSignedIn)
             }
         }
